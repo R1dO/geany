@@ -405,7 +405,7 @@ gboolean tm_workspace_load_global_tags(const char *tags_file, TMParserType mode)
 
 static guint tm_file_inode_hash(gconstpointer key)
 {
-	GStatBuf file_stat;
+	struct stat file_stat;
 	const char *filename = (const char*)key;
 	if (g_stat(filename, &file_stat) == 0)
 	{
