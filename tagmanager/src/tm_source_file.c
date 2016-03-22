@@ -36,14 +36,6 @@
 #include "tm_tag.h"
 #include "tm_parser.h"
 
-typedef struct
-{
-	TMSourceFile public;
-	guint refcount;
-} TMSourceFilePriv;
-
-#define SOURCE_FILE_NEW(S) ((S) = g_slice_new(TMSourceFilePriv))
-#define SOURCE_FILE_FREE(S) g_slice_free(TMSourceFilePriv, (TMSourceFilePriv *) S)
 
 static TMSourceFile *current_source_file = NULL;
 
@@ -210,26 +202,12 @@ static gboolean tm_source_file_init(TMSourceFile *source_file, const char *file_
 GEANY_API_SYMBOL
 TMSourceFile *tm_source_file_new(const char *file_name, const char *name)
 {
-	TMSourceFilePriv *priv;
-
-	SOURCE_FILE_NEW(priv);
-	if (TRUE != tm_source_file_init(&priv->public, file_name, name))
+	TMSourceFile *source_file = g_new(TMSourceFile, 1);
+	if (TRUE != tm_source_file_init(source_file, file_name, name))
 	{
-		SOURCE_FILE_FREE(priv);
+		g_free(source_file);
 		return NULL;
 	}
-	priv->refcount = 1;
-	return &priv->public;
-}
-
-
-static TMSourceFile *tm_source_file_dup(TMSourceFile *source_file)
-{
-	TMSourceFilePriv *priv = (TMSourceFilePriv *) source_file;
-
-	g_return_val_if_fail(NULL != source_file, NULL);
-
-	g_atomic_int_inc(&priv->refcount);
 	return source_file;
 }
 
@@ -248,33 +226,19 @@ static void tm_source_file_destroy(TMSourceFile *source_file)
 	source_file->tags_array = NULL;
 }
 
-/** Decrements the reference count of @a source_file
- *
- * If the reference count drops to 0, then @a source_file is freed, including all contents.
- * Make sure the @a source_file is already removed from any TMWorkSpace before the
- * this happens.
- * @param source_file The source file to free.
- * @see tm_workspace_remove_source_file()
+/** Frees a TMSourceFile structure, including all contents. Before calling this
+ function the TMSourceFile has to be removed from the TMWorkspace. 
+ @param source_file The source file to free.
 */
 GEANY_API_SYMBOL
 void tm_source_file_free(TMSourceFile *source_file)
 {
-	TMSourceFilePriv *priv = (TMSourceFilePriv *) source_file;
-
-	if (NULL != priv && g_atomic_int_dec_and_test(&priv->refcount))
+	if (NULL != source_file)
 	{
 		tm_source_file_destroy(source_file);
-		SOURCE_FILE_FREE(priv);
+		g_free(source_file);
 	}
 }
-
-/** Gets the GBoxed-derived GType for TMSourceFile
- *
- * @return TMSourceFile type . */
-GEANY_API_SYMBOL
-GType tm_source_file_get_type(void);
-
-G_DEFINE_BOXED_TYPE(TMSourceFile, tm_source_file, tm_source_file_dup, tm_source_file_free);
 
 /* Parses the text-buffer or source file and regenarates the tags.
  @param source_file The source file to parse
