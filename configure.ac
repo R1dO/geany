@@ -70,12 +70,12 @@ AS_IF([test "x$enable_gtk3" = xyes],
 	  [gtk_package=gtk+-3.0
 	   gtk_min_version=3.0],
 	  [gtk_package=gtk+-2.0
-	   gtk_min_version=2.24])
+	   gtk_min_version=2.18])
 AM_CONDITIONAL([GTK3], [test "x$gtk_package" = "xgtk+-3.0"])
 
 # GTK/GLib/GIO checks
-gtk_modules="$gtk_package >= $gtk_min_version glib-2.0 >= 2.28"
-gtk_modules_private="gio-2.0 >= 2.28 gmodule-no-export-2.0"
+gtk_modules="$gtk_package >= $gtk_min_version glib-2.0 >= 2.22"
+gtk_modules_private="gio-2.0 >= 2.22 gmodule-no-export-2.0"
 PKG_CHECK_MODULES([GTK], [$gtk_modules $gtk_modules_private])
 AC_SUBST([DEPENDENCIES], [$gtk_modules])
 dnl Define minimum requirements to avoid warnings about symbols deprecated afterward.
