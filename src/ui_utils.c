@@ -1500,7 +1500,7 @@ GtkWidget *ui_dialog_vbox_new(GtkDialog *dialog)
 }
 
 
-static GtkWidget *dialog_get_widget_for_response(GtkDialog *dialog, gint response_id)
+GtkWidget *dialog_get_widget_for_response(GtkDialog *dialog, gint response_id)
 {
 #if GTK_CHECK_VERSION(2, 20, 0)
 	return gtk_dialog_get_widget_for_response(dialog, response_id);

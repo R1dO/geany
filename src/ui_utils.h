@@ -101,6 +101,8 @@ GeanyMainWidgets;
 
 GtkWidget *ui_dialog_vbox_new(GtkDialog *dialog);
 
+GtkWidget *dialog_get_widget_for_response(GtkDialog *dialog, gint response_id);
+
 GtkWidget *ui_frame_new_with_alignment(const gchar *label_text, GtkWidget **alignment);
 
 void ui_set_statusbar(gboolean log, const gchar *format, ...) G_GNUC_PRINTF (2, 3);

@@ -25,6 +25,7 @@
  */
 
 #include "utils.h"
+#include "ui_utils.h"
 
 #include "gtkcompat.h"
 
@@ -381,7 +382,7 @@ static void geany_pong_init(GeanyPong *self)
 		GTK_STOCK_CLOSE, GTK_RESPONSE_CLOSE,
 		NULL);
 	gtk_dialog_set_default_response(GTK_DIALOG(self), GTK_RESPONSE_HELP);
-	gtk_widget_grab_focus(gtk_dialog_get_widget_for_response(GTK_DIALOG(self), GTK_RESPONSE_HELP));
+	gtk_widget_grab_focus(dialog_get_widget_for_response(GTK_DIALOG(self), GTK_RESPONSE_HELP));
 
 	gtk_widget_show_all(vbox);
 }

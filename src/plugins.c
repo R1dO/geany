@@ -1071,8 +1071,10 @@ load_active_plugins(void)
 	do
 	{
 		proxies = active_proxies.length;
-		g_list_free_full(failed_plugins_list, (GDestroyNotify) g_free);
-		failed_plugins_list = NULL;
+// g_list_free_full(failed_plugins_list, (GDestroyNotify) g_free);
+                g_list_foreach(failed_plugins_list , (GFunc) g_free, NULL);
+                g_list_free(failed_plugins_list );
+                failed_plugins_list = NULL;
 		for (i = 0; i < len; i++)
 		{
 			gchar *fname = active_plugins_pref[i];
