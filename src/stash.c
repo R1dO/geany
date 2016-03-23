@@ -123,7 +123,6 @@ typedef struct StashPref StashPref;
 
 struct StashGroup
 {
-	guint refcount;				/* ref count for GBoxed implementation */
 	const gchar *name;			/* group name to use in the keyfile */
 	GPtrArray *entries;			/* array of (StashPref*) */
 	gboolean various;		/* mark group for display/edit in stash treeview */
@@ -348,27 +347,17 @@ gint stash_group_save_to_file(StashGroup *group, const gchar *filename,
 }
 
 
-static void free_stash_pref(StashPref *pref)
-{
-	if (pref->widget_type == GTK_TYPE_RADIO_BUTTON)
-		g_free(pref->extra.radio_buttons);
-
-	g_slice_free(StashPref, pref);
-}
-
-
 /** Creates a new group.
  * @param name Name used for @c GKeyFile group.
  * @return Group. */
 GEANY_API_SYMBOL
 StashGroup *stash_group_new(const gchar *name)
 {
-	StashGroup *group = g_slice_new0(StashGroup);
+	StashGroup *group = g_new0(StashGroup, 1);
 
 	group->name = name;
-	group->entries = g_ptr_array_new_with_free_func((GDestroyNotify) free_stash_pref);
+	group->entries = g_ptr_array_new();
 	group->use_defaults = TRUE;
-	group->refcount = 1;
 	return group;
 }
 
@@ -397,34 +386,25 @@ void stash_group_free_settings(StashGroup *group)
 }
 
 
-static StashGroup *stash_group_dup(StashGroup *src)
-{
-	g_atomic_int_inc(&src->refcount);
-
-	return src;
-}
-
-
 /** Frees a group.
  * @param group . */
 GEANY_API_SYMBOL
 void stash_group_free(StashGroup *group)
 {
-	if (g_atomic_int_dec_and_test(&group->refcount))
+	StashPref *entry;
+	guint i;
+
+	foreach_ptr_array(entry, i, group->entries)
 	{
-		g_ptr_array_free(group->entries, TRUE);
-		g_slice_free(StashGroup, group);
+		if (entry->widget_type == GTK_TYPE_RADIO_BUTTON)
+		{
+			g_free(entry->extra.radio_buttons);
+		}
+		g_slice_free(StashPref, entry);
 	}
+	g_ptr_array_free(group->entries, TRUE);
+	g_free(group);
 }
-
-
-/** Gets the GBoxed-derived GType for StashGroup
- *
- * @return StashGroup type . */
-GEANY_API_SYMBOL
-GType stash_group_get_type(void);
-
-G_DEFINE_BOXED_TYPE(StashGroup, stash_group, stash_group_dup, stash_group_free);
 
 
 /* Used for selecting groups passed to stash_tree_setup().
